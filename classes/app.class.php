@@ -95,6 +95,8 @@ class app
      */
      var $helpers = array();
 
+     var $startTime = 0;
+
 	/**
 	 * Contains names / urls of action urls for display in translation files
 	 */
@@ -105,6 +107,7 @@ class app
 	 */
 	function __construct()
 	{
+        $this->startTime = microtime(true);
 	}
 
 	function getActionsPath()
@@ -448,11 +451,11 @@ input{
             $path = MODULE_DIR . DIRECTORY_SEPARATOR . $file;
             if( !preg_match('#\.\.#', $path) ) {
                 header("Status: 200 Ok");
-                header('Pragma:');
-                header('Cache-Control:');
+//                header('Pragma:');
+//                header('Cache-Control:');
                 $lastModified = filemtime($path);
                 header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
-                header('Expires: ' . gmdate("D, d M Y H:i:s", time() + 3600 * 72) . " GMT");
+                header('Expires: ' . gmdate("D, d M Y H:i:s", time() + 3600 * 24 * 365) . " GMT");
                 if( in_array($match[2], array('css','js') ) ) {
                     $base_url = preg_replace('#[a-z0-9_-]+$#i', '', $match[1]);
                     $lines = file($path);
@@ -465,6 +468,7 @@ input{
                     $content = str_replace($s, $r, $content);
                     $contenttype = 'text/plain';
             		header("Content-Type: $contenttype");
+                    header('Content-Length:'.strlen($content));
                     echo $content;
                 }
                 else {
@@ -924,4 +928,8 @@ EOF;
         return $this->helpers[$name];
     }
 
+    function getTimeTaken($precision = 2)
+    {
+        return number_format(microtime(true) - $this->startTime, $precision);
+    }
 }
