@@ -451,11 +451,10 @@ input{
             $path = MODULE_DIR . DIRECTORY_SEPARATOR . $file;
             if( !preg_match('#\.\.#', $path) ) {
                 header("Status: 200 Ok");
-//                header('Pragma:');
-//                header('Cache-Control:');
                 $lastModified = filemtime($path);
                 header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
-                header('Expires: ' . gmdate("D, d M Y H:i:s", time() + 3600 * 24 * 365) . " GMT");
+                header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
+                header("Cache-Control: max-age=315360000");
                 if( in_array($match[2], array('css','js') ) ) {
                     $base_url = preg_replace('#[a-z0-9_-]+$#i', '', $match[1]);
                     $lines = file($path);
@@ -466,7 +465,7 @@ input{
                     $r[] = $this->config->siteurl.'modules/'.preg_replace('#^([a-z0-9_-]+/[a-z0-9_-]+/).*$#i', '$1', $base_url);
                     $r[] = $this->config->siteurl.'modules/'.$base_url;
                     $content = str_replace($s, $r, $content);
-                    $contenttype = 'text/plain';
+                    $contenttype = 'text/'.($match[2] == 'css' ? 'css' : 'javascript');
             		header("Content-Type: $contenttype");
                     header('Content-Length:'.strlen($content));
                     echo $content;
