@@ -140,7 +140,7 @@ class galleryAction extends action
                 $banners = $this->app->loadClass('adrotator');
                 $banners->preload($adcnt);
                 for( $i = 0; $i < $adcnt; $i++ ) {
-                    $tpl = preg_replace('{bannerad}', $banners->display(true), $tpl, 1);
+                    $tpl = preg_replace('#{bannerad}#', $banners->display(true), $tpl, 1);
                 }
             }
 			$tpl = str_replace($s, $r, $tpl);
