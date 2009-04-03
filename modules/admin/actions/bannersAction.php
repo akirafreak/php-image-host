@@ -42,7 +42,7 @@ class bannersAction extends Action
         	if( !$ad ) $aid = 0;
         }
 
-        if( $ad && $this->app->getParamStr->getstr('update') ){
+        if( $ad && $this->app->getParamStr->getParamStr('update') ){
         	$ad->content = $this->app->getParamStr('content');
             $ad->group = $this->app->getParamStr('group');
             $ad->live = $this->app->getParamInt('live');
