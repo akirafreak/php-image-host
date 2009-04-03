@@ -88,7 +88,7 @@ class myimagesAction extends action
 			// user wants to email links to their images to their friends..
 
 			$ids = isset($_POST['ids']) ? $_POST['ids'] : array();
-			$imgs = $images->getimages(array('ids'=>$ids, 'user_id'=>$userid));
+			$imgs = $images->getimages(array('ids'=>$ids, 'user_id'=>$user->user_id));
 			if( count($imgs) ){
 				$emails = array();
 				$sentto = array();
