@@ -452,8 +452,9 @@ input{
             if( !preg_match('#\.\.#', $path) ) {
                 header("Status: 200 Ok");
                 $lastModified = filemtime($path);
+                header('Pragma:');
                 header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
-                header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
+                header("Expires: ".gmdate("D, d M Y H:i:s", $lastModified+315360000)." GMT");
                 header("Cache-Control: max-age=315360000");
                 if( in_array($match[2], array('css','js') ) ) {
                     $base_url = preg_replace('#[a-z0-9_-]+$#i', '', $match[1]);

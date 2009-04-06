@@ -29,14 +29,6 @@ THE SOFTWARE.
 class galleryAction extends action
 {
 
-	function init()
-	{
-		if( !$this->config->browse_images ){
-			header('location: '.$this->app->url());
-			exit();
-		}
-	}
-
 	function run()
 	{
 		$un = $this->app->getParamStr('u');
