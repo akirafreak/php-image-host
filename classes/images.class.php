@@ -62,6 +62,13 @@ class images{
 			$nw = (int)((double)$w / $d);
 			$nh = (int)((double)$h / $d);
 			$dest = imagecreatetruecolor($nw, $nh);
+            $trans = imagecolortransparent($src);
+            if( $trans >= 0 ) {
+                $toriginal = imagecolorsforindex($src, $trans);
+                $tc = imagecolorallocate($dest, $toriginal['red'], $toriginal['green'], $toriginal['blue']);
+                imagefilledrect($dest, 0, 0, $nw, $nh, $tc);
+                imagecolortransparent($dest, $tc); echo "Transparentising!";
+            }
 			imagecopyresampled($dest, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
 			if( $destroy ) imagedestroy($src);
 			return $dest;
@@ -305,7 +312,6 @@ class images{
                                     imagedestroy($img);
                                     $img = $tmp;
                                 }
-
                                 $this->brand_image($img);
                                 $modified = true;
                             }
@@ -322,24 +328,24 @@ class images{
                             $res = $this->ace->query($sql, 'Add Image');
                             $id = mysql_insert_id();
                             if( $id ){
+                                $iname = $this->ace->config->image_folder.$this->user->username.DIRECTORY_SEPARATOR.$fname.'.'.$type;
                                 if( $this->user->auto_jpeg == 1 ){
-                                    imagejpeg($img, $this->ace->config->image_folder.$this->user->username.'/'.$fname.'.jpg', $this->user->jpeg_quality);
+                                    imagejpeg($img, $iname, $this->user->jpeg_quality);
                                 }else{
                                     if( !$modified ){
-                                        move_uploaded_file($file, $this->ace->config->image_folder.$this->user->username.'/'.$fname.'.'.$type);
+                                        copy($file, $iname);
                                     }else{
                                         if( $type == 'jpg' ){
-                                            imagejpeg($img, $this->ace->config->image_folder.$this->user->username.'/'.$fname.'.jpg', $this->user->jpeg_quality);
+                                            imagejpeg($img, $iname, $this->user->jpeg_quality);
                                         }elseif( $type == 'gif' ){
-                                            imagegif($img, $this->ace->config->image_folder.$this->user->username.'/'.$fname.'.gif');
+                                            imagegif($img, $iname);
                                         }else{
-                                            imagepng($img, $this->ace->config->image_folder.$this->user->username.'/'.$fname.'.png');
+                                            imagepng($img, $iname);
                                         }
                                     }
                                 }
-                                $iname = $this->ace->config->image_folder.$this->user->username.'/'.$fname.'.'.$type;
                                 chmod($iname, 0666);
-                                $fsize = filesize($iname);
+                                $fsize = (int)filesize($iname);
                                 $sql = "UPDATE images SET filesize=$fsize WHERE image_id=$id ";
                                 $this->ace->query($sql, 'Set Image File Size');
                                 $tname = $this->ace->config->thumb_folder.$this->user->username.'/'.$fname.'.jpg';
