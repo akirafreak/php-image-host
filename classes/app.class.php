@@ -450,12 +450,17 @@ input{
             $file = $match[1].'.'.$match[2];
             $path = MODULE_DIR . DIRECTORY_SEPARATOR . $file;
             if( !preg_match('#\.\.#', $path) ) {
-                header("Status: 200 Ok");
                 $lastModified = filemtime($path);
                 header('Pragma:');
                 header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
                 header("Expires: ".gmdate("D, d M Y H:i:s", $lastModified+315360000)." GMT");
                 header("Cache-Control: max-age=315360000");
+//                if( isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+//                    header('Status: 304 Not Modified');
+//                    exit();
+//                }
+
+                header("Status: 200 Ok");
                 if( in_array($match[2], array('css','js') ) ) {
                     $base_url = preg_replace('#[a-z0-9_-]+$#i', '', $match[1]);
                     $lines = file($path);
@@ -499,6 +504,10 @@ input{
 		}
         if( $action_name == 'static' ) {
             $this->doStatic($command);
+        }
+        else {
+            // start sessions
+            session_start();
         }
 		$this->setActionName($action_name);
 		$this->params = array();
