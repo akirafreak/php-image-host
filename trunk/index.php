@@ -32,9 +32,6 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 // define this to stop other files being included when they shouldnt
 define('PIH', true);
-// start sessions
-
-session_start();
 // include configuration / initialization options
 
 require_once dirname(__FILE__) . '/classes/app.class.php';
