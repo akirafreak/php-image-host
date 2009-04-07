@@ -157,6 +157,15 @@ class ziphelper
                                 // extract the file to the temp name
                                 $result = $zip->extractByIndex($entry['index'], PCLZIP_OPT_PATH, $temp_dir, PCLZIP_OPT_REMOVE_ALL_PATH);
                                 if($result ) {
+/* debugging, hopefully no longer needed
+                                   if( $this->app->config->debug_imagick ) {
+
+                                        echo '<hr />Debug: Extracted file should be: ',$newname,"\n<pre>";
+                                        print_r($result);
+                                        echo '</pre>',"\n";
+                                        echo (file_exists($newname) ? ' File Extracted ' : ' File not extracted ');
+                                    }
+*/
                                     // add the image
                                     $iid = $this->images->addimage($oname, $this->user->user_id, $newname, $this->gallery, 0, $this->public);
                                     // delete the temp file
@@ -183,7 +192,7 @@ class ziphelper
                         }
                     }
                 }
-                rmdir($temp_dir);
+//                rmdir($temp_dir);
             }
             else{
                 $this->errors[] = $this->app->translate('Unable to read from zip archive');
