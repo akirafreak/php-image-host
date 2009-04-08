@@ -360,7 +360,8 @@ input{
         $filename = $themeDir . $file;
         $url = '';
         if( file_exists($filename)){
-            $url = $this->url('static/'.filemtime($filename).'/'.$module . '/themes/'.$file, null,'default');
+//            $url = $this->url('static/'.filemtime($filename).'/'.$module . '/themes/'.$file, null,'default');
+            $url = $this->config->siteurl.'modules/'.$module.'/themes/'.$file;
         }
         return $url;
     }
@@ -446,6 +447,10 @@ input{
 
     function doStatic($url)
     {
+				$fp = fopen(dirname(__FILE__).'/log.txt', 'a');
+				if( $fp ) {
+					fwrite($fp, "\n".date('H:i:s')." $url ");
+				}
         if( preg_match('#^static/[0-9]+/(.+)\.(css|js|gif|ico|png|jpg)$#i', $url, $match ) ) {
             $file = $match[1].'.'.$match[2];
             $path = MODULE_DIR . DIRECTORY_SEPARATOR . $file;
@@ -455,10 +460,11 @@ input{
                 header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
                 header("Expires: ".gmdate("D, d M Y H:i:s", $lastModified+315360000)." GMT");
                 header("Cache-Control: max-age=315360000");
-//                if( isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-//                    header('Status: 304 Not Modified');
-//                    exit();
-//                }
+                if( isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+                    header('Status: 304 Not Modified');
+										fwrite($fp, 'NOT MODIFIED');
+                    exit();
+                }
 
                 header("Status: 200 Ok");
                 if( in_array($match[2], array('css','js') ) ) {
@@ -472,17 +478,24 @@ input{
                     $r[] = $this->config->siteurl.'modules/'.$base_url;
                     $content = str_replace($s, $r, $content);
                     $contenttype = 'text/'.($match[2] == 'css' ? 'css' : 'javascript');
-            		header("Content-Type: $contenttype");
+            				header("Content-Type: $contenttype");
                     header('Content-Length:'.strlen($content));
+										fwrite($fp, 'Modified');
                     echo $content;
                 }
                 else {
+//										fwrite($fp, 'Image');
+
                     header("Content-Type: image/".$match[2]);
                     readfile($path);
                 }
             }
+						else {
+//							fwrite($fp, 'Dodgy Dir');
+						}
         }
         else {
+//					fwrite($fp, 'Not Static');
         }
         exit();
     }

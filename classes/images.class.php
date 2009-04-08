@@ -63,14 +63,18 @@ class images{
 			$nh = (int)((double)$h / $d);
 			$dest = imagecreatetruecolor($nw, $nh);
             $trans = imagecolortransparent($src);
+            imagealphablending($dest, false);
             if( $trans >= 0 ) {
                 $toriginal = imagecolorsforindex($src, $trans);
                 $tc = imagecolorallocate($dest, $toriginal['red'], $toriginal['green'], $toriginal['blue']);
                 imagefilledrect($dest, 0, 0, $nw, $nh, $tc);
+                imagealphablending($dest, false);
                 imagecolortransparent($dest, $tc); echo "Transparentising!";
             }
 			imagecopyresampled($dest, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+            imagealphablending($dest, true);
 			if( $destroy ) imagedestroy($src);
+            imagesavealpha($dest, true);
 			return $dest;
 		}
 		return $src;
