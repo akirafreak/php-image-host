@@ -94,7 +94,7 @@ class images{
 					$userbandwidths[$i->user_id] += $i->bandwidthr;
 					$iids[] = $i->image_id;
 					$fname = $this->ace->config->image_folder.$i->username.'/'.$i->name.'.'.$i->type;
-					$tname = $this->ace->config->thumb_folder.$i->username.'/'.$i->name.'.jpg';
+					$tname = $this->ace->config->thumb_folder.$i->username.'/'.$i->name.'.'.$i->thumb_type;
 					if( file_exists($fname) ){
 						unlink($fname);
 					}
@@ -142,7 +142,7 @@ class images{
 			$tpath = mysql_real_escape_string($this->ace->config->thumb_url);
 			$sql = "SELECT i.*, u.username, u.email, g.gallery_name, ";
 			$sql .="CONCAT('$ipath',u.username,'/', i.name, '.', type) AS image_url,  ";
-			$sql .="CONCAT('$tpath',u.username,'/', i.name, '.jpg') AS thumb_url ";
+			$sql .="CONCAT('$tpath',u.username,'/', i.name, '.', thumb_type) AS thumb_url ";
 		}
 		$sql .="FROM {pa_dbprefix}images i LEFT OUTER JOIN {pa_dbprefix}galleries g ON i.gallery_id=g.gallery_id, ";
 		$sql .="{pa_dbprefix}users u  ";
@@ -247,6 +247,7 @@ class images{
 			$this->errors[] = 'You are already using all of your image storage allowance ('.$this->user->max_images.' images uploaded.)';
 			return 0;
 		}
+        $thumb_type = 'jpg';
 		settype($gallery, 'integer');
 		settype($public, 'integer');
 		if( !isset($this->user->galleries[$gallery]) ) $gallery = 0;
@@ -326,9 +327,9 @@ class images{
                                 $type = 'png';
                             }
                             $sql = "INSERT INTO images (name, user_id, type, width, height, ";
-                            $sql .="uploaded, filesize, ip, checked, gallery_id, public) ";
+                            $sql .="uploaded, filesize, ip, checked, gallery_id, public, thumb_type) ";
                             $sql .="VALUES ('$fname', $userid,'$type', ";
-                            $sql .="$width, $height, now(),$size, '$ip', $checked, $gallery, $public) ";
+                            $sql .="$width, $height, now(),$size, '$ip', $checked, $gallery, $public, '{$thumb_type}') ";
                             $res = $this->ace->query($sql, 'Add Image');
                             $id = mysql_insert_id();
                             if( $id ){
@@ -352,9 +353,8 @@ class images{
                                 $fsize = (int)filesize($iname);
                                 $sql = "UPDATE images SET filesize=$fsize WHERE image_id=$id ";
                                 $this->ace->query($sql, 'Set Image File Size');
-                                $tname = $this->ace->config->thumb_folder.$this->user->username.'/'.$fname.'.jpg';
-                                imagejpeg($thumb, $tname, $this->user->jpeg_quality);
-                                chmod($tname, 0777);
+                                $tname = $this->ace->config->thumb_folder.$this->user->username.'/'.$fname.'.'.$thumb_type;
+                                $this->saveImage($thumb, $tname, $this->user->jpeg_quality);
                                 return $id;
                             }else{
                                 $this->errors[] = 'A database error occurred whilst attempting to add the image "'.htmlspecialchars($name).'". Please try again later.';
@@ -382,7 +382,7 @@ class images{
                                 $type = 'jpg';
                             }
                             $iname = $this->app->config->image_folder.$this->user->username.DIRECTORY_SEPARATOR.$fname.'.'.$type;
-                            $tname = $this->app->config->thumb_folder.$this->user->username.DIRECTORY_SEPARATOR.$fname.'.jpg';
+                            $tname = $this->app->config->thumb_folder.$this->user->username.DIRECTORY_SEPARATOR.$fname.'.'.$thumb_type;
 
                             if( !$modified ) {
                                 copy($file, $iname);
@@ -411,9 +411,9 @@ class images{
                             chmod($tname, 0777);
 
                             $sql = "INSERT INTO images (name, user_id, type, width, height, ";
-                            $sql .="uploaded, filesize, ip, checked, gallery_id, public) ";
+                            $sql .="uploaded, filesize, ip, checked, gallery_id, public, thumb_type) ";
                             $sql .="VALUES ('$fname', $userid,'$type', ";
-                            $sql .="$width, $height, now(),$size, '$ip', $checked, $gallery, $public) ";
+                            $sql .="$width, $height, now(),$size, '$ip', $checked, $gallery, $public, '{$thumb_type}') ";
                             $res = $this->ace->query($sql, 'Add Image');
                             $id = mysql_insert_id();
 
@@ -458,7 +458,7 @@ class images{
 		$tpath = mysql_real_escape_string($this->ace->config->thumb_url);
 		$sql = "SELECT i.*, u.username, g.gallery_name, ";
 		$sql .="CONCAT('$ipath', u.username, '/',i.name, '.', type) AS image_url,  ";
-		$sql .="CONCAT('$tpath', u.username, '/',i.name, '.jpg') AS thumb_url ";
+		$sql .="CONCAT('$tpath', u.username, '/',i.name, '.', thumb_type) AS thumb_url ";
 		$sql .="FROM images i LEFT OUTER JOIN galleries g ON i.gallery_id = g.gallery_id ";
 		$sql .=",users u ";
 		$wheres = array('i.user_id=u.user_id');
@@ -588,6 +588,7 @@ class images{
     }
 
 	function resizeexistingimage(&$image, $newwidth, $newheight, $copy = false){
+        $thumb_type = $image->thumb_type;
 		if( $newwidth == $image->width && $newheight == $image->height || ($newwidth == 0 && $newheight == 0)){
 			$this->errors[] = 'You must enter a new width and / or height for this image.';
 			return false;
@@ -666,7 +667,7 @@ class images{
                         $cmd .= ' 2>&1 ';
                     }
                     passthru($cmd);
-                    $cmd = $convert . ' -geometry '.$twidth.'x'.$theight.'! '.$tpath.$image->name.'.jpg '.$tpath.$name.'.jpg';
+                    $cmd = $convert . ' -geometry '.$twidth.'x'.$theight.'! '.$tpath.$image->name.'.'.$image->thumb_type.' '.$tpath.$name.'.'.$image->thumb_type;
                     if( $this->app->config->debug_imagick ) {
                         echo $cmd;
                         $cmd .= ' 2>&1 ';
@@ -685,7 +686,7 @@ class images{
                     }
                     passthru($cmd);
                     $size = (int)filesize($ipath.$image->name.'.'.$image->type);
-                    $cmd = $mogrify . ' -geometry '.$twidth.'x'.$theight.'! ' . $tpath.$image->name.'.jpg';
+                    $cmd = $mogrify . ' -geometry '.$twidth.'x'.$theight.'! ' . $tpath.$image->name.'.'.$image->thumb_type;
                         if( $this->app->config->debug_imagick ) {
                             echo $cmd;
                             $cmd .= ' 2>&1 ';
@@ -731,16 +732,16 @@ class images{
                     $ip = isset($_SERVER['X_FORWARDED_FOR']) ? $_SERVER['X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
                     $ip = mysql_real_escape_string($ip);
                     $sql = "INSERT INTO images (name, user_id, type, width, height, ";
-                    $sql .="uploaded, filesize, ip, checked, gallery_id) ";
+                    $sql .="uploaded, filesize, ip, checked, gallery_id, thumb_type) ";
                     $sql .="VALUES ('$name', {$this->user->user_id},'$savetype', ";
-                    $sql .="$newwidth, $newheight, now(),0, '$ip', {$image->checked},0) ";
+                    $sql .="$newwidth, $newheight, now(),0, '$ip', {$image->checked},0, '{$thumb_type}') ";
                     $res = $this->ace->query($sql, 'Add Image');
 
                     $id = mysql_insert_id();
 
                     if( $id ){
                         $iname = $ipath.$name.'.'.$savetype;
-                        $tname = $tpath.$name.'.jpg';
+                        $tname = $tpath.$name.'.'.$thumb_type;
                         switch( $savetype ){
                             case 'png':
                                 imagepng($dest, $ipath.$name.'.'.$savetype);
@@ -754,7 +755,8 @@ class images{
                         }
 
                         $thumb = $this->resizeimage($dest, $this->ace->config->thumbnail_width, $this->ace->config->thumbnail_height, true);
-                        imagejpeg($thumb, $tname, $this->user->jpeg_quality);
+                        $this->saveImage($thumb, $tname, $this->user->jpeg_quality);
+                        //imagejpeg($thumb, $tname, $this->user->jpeg_quality);
                         imagedestroy($thumb);
                         $fsize = (int)filesize($iname);
                         $sql = "UPDATE images SET filesize=$fsize WHERE image_id=$id ";
@@ -796,7 +798,7 @@ class images{
         $name = $image->name;
         $tpath = $this->ace->config->thumb_folder.$this->user->username.DIRECTORY_SEPARATOR;
         $ipath = $this->ace->config->image_folder.$this->user->username.DIRECTORY_SEPARATOR;
-        $tname = str_replace("\\", "/", $tpath.$image->name.'.jpg');
+        $tname = str_replace("\\", "/", $tpath.$image->name.'.'.$image->thumb_type);
         $mogrify = str_replace("\\", "/", $mogrify);
         $iname = str_replace("\\", "/", $iname);
         $cmd = '"'.$mogrify.'" -rotate '.$angle.' '.$iname;
@@ -848,7 +850,7 @@ class images{
 			$name = $image->name;
 			$tpath = $this->ace->config->thumb_folder.$this->user->username.'/';
 			$ipath = $this->ace->config->image_folder.$this->user->username.'/';
-			$tname = $tpath.$image->name.'.jpg';
+			$tname = $tpath.$image->name.'.'.$image->thumb_type;
 
 			// delete existing image
 			unlink($ipath.$image->name.'.'.$image->type);
@@ -871,7 +873,7 @@ class images{
 			$this->ace->query($sql, 'Rotate Image');
 
 			$thumb = $this->resizeimage($dest, $this->ace->config->thumbnail_width, $this->ace->config->thumbnail_height, true);
-			imagejpeg($thumb, $tname, $this->user->jpeg_quality);
+			$this->saveImage($thumb, $tname, $this->user->jpeg_quality);
 			imagedestroy($thumb);
 			return true;
 		}else{
@@ -898,7 +900,7 @@ class images{
 		}
 		$tdir = $this->ace->config->thumb_folder.$this->user->username.'/';
 		$idir = $this->ace->config->image_folder.$this->user->username.'/';
-		rename($tdir.$image->name.'.jpg', $tdir.$newname.'.jpg');
+		rename($tdir.$image->name.'.'.$image->thumb_type, $tdir.$newname.'.'.$image->thumb_type);
 		rename($idir.$image->name.'.'.$image->type, $idir.$newname.'.'.$image->type);
 		$image->name = $newname;
 		$sql = "UPDATE {pa_dbprefix}images SET name='".mysql_real_escape_string($newname)."' WHERE image_id={$image->image_id} ";
@@ -1081,6 +1083,26 @@ class images{
 		}
 		return $deleted;
 	}
+
+    function saveImage($image, $fname, $jpeg_quality = 70)
+    {
+        $format = 'jpg';
+        if( preg_match('#\.(jpg|gif|png)$#', $fname, $match) ) {
+            $format = $match[1];
+        }
+        switch( $format ) {
+            case 'jpg':
+                imagejpeg($image, $fname, $jpeg_quality);
+                break;
+            case 'png':
+                imagepng($image, $fname);
+                break;
+            case 'gif':
+                imagegif($image, $fname);
+                break;
+        }
+        chmod($fname, 0777);
+    }
 
 }
 

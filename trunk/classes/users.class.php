@@ -238,12 +238,12 @@ class users{
 			$usernames = array();
 			while( list($uname) = mysql_fetch_row($res) ) $usernames[] = $uname;
 			if( count($usernames) > 0 ){
-				$sql = "SELECT i.name, i.type, u.username ";
+				$sql = "SELECT i.name, i.type, u.username, i.thumb_type ";
 				$sql .="FROM images i, users u ";
 				$sql .="WHERE i.user_id=u.user_id AND i.user_id IN (".join(",",$ids).") ";
 				$res = $this->ace->query($sql, 'Get Members IMages');
 //				echo "Listing images to delete<br />";
-				while( list($name,$type,$username) = mysql_fetch_row($res) ){
+				while( list($name,$type,$username, $thumb_type) = mysql_fetch_row($res) ){
 					$fname = $this->ace->config->image_folder.$username.'/'.$name.'.'.$type;
 //					echo "Attempt to delete $fname...";
 					if( file_exists($fname) ){
@@ -251,7 +251,7 @@ class users{
 					}else{
 //						die("$fname does not exist...");
 					}
-					$tname = $this->ace->config->thumb_folder.$username.'/'.$name.'.jpg';
+					$tname = $this->ace->config->thumb_folder.$username.'/'.$name.'.'.$thumb_type;
 //					echo "Attempt to delete $tname...";
 					if( file_exists($tname) ){
 						unlink($tname); //echo "$tname unlinked...";
