@@ -193,6 +193,21 @@ if( $updated ){
 	</td>
 </tr>
 <tr>
+    <td class="formlabel">Thumbnail Format:</td>
+    <td class="formfield">
+        <select name="thumb_format">
+            <option value="jpeg">JPEG</option>
+            <option value="auto"<?php if( $this->app->config->thumb_format == 'auto' ) echo ' selected="selected" '?>>Auto-detect Best Format</option>
+            <option value="original"<?php if( $this->app->config->thumb_format == 'original' ) echo ' selected="selected" '?>>Use original image format</option>
+        </select>
+        <br />The image format to use for thumbnail images. JPEG normally creates the smallest file sizes,
+        but results in loss of transparency for gif or png images that have transparency or alpha channel.
+        <br />&quot;Use original format&quot; always uses the format of the original image.
+        <br />Auto-detect will create a jpeg thumbnail unless the image has transparency / alpha-channel information
+        in which case the thumbnail will be saved as a PNG or GIF.
+    </td>
+</tr>
+<tr>
 	<td class="formlabel">Max Gallery Image Width:</td>
 	<td class="formfield"><input type="text" class="formnumber"  name="gallery_max_image_width" value="<?php echo $this->app->config->gallery_max_image_width;?>" />
 		<br />The maximum width to display images on the gallery pages.

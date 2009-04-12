@@ -61,6 +61,7 @@ class settingsAction extends Action
 			if( !in_array($this->app->config->language, $languages) ) {
 				$this->app->config->language = 'default';
 			}
+            $this->app->config->thumb_format = $this->app->getParamStr('thumb_format');
 			
             $this->app->config->show_errors = $this->app->getParamInt('show_errors');
             $this->app->config->payment_email_subject = $this->app->getParamStr('payment_email_subject');

@@ -281,7 +281,10 @@ class images{
                         $height = $info[1];
                         $type = $this->imagetypes[$info[2]];
                         $size = (int)filesize($file);
-
+                        // are we saving thumbnail in original image format?
+                        if( $this->app->config->thumb_format == 'original' ) {
+                            $thumb_type = $type;
+                        }
                         if( !$this->app->config->imagick_path ) { // using gd
                             $imgfuncs = array(IMAGETYPE_JPEG=>'imagecreatefromjpeg', IMAGETYPE_PNG=>'imagecreatefrompng',
                                                     IMAGETYPE_GIF=>'imagecreatefromgif');
@@ -302,6 +305,11 @@ class images{
                                         imagedestroy($img);
                                         return false;
                                     }
+                                }
+                                // if we are auto-detecting best thumbnail type...
+                                if( $this->app->config->thumb_format == 'auto' ) {
+                                    imagesavealpha($thumb, true);
+                                    $thumb_type = $type;
                                 }
                                 // create thumbnail
                                 $thumb = $this->resizeimage($img, $this->ace->config->thumbnail_width, $this->ace->config->thumbnail_height, false);
@@ -361,6 +369,10 @@ class images{
                             }
                         }
                         else {  // add with imagemagick
+
+                            if( $this->app->config->thumb_format == 'auto' ) {
+                                $thumb_type = $type;
+                            }
                             $cmd = $this->app->config->imagick_path . '/convert'." ".$file.' -quality '.$this->user->jpeg_quality.'% ';
                             $modified = false;
                             if( $width > $this->user->max_image_width || $height > $this->user->max_image_height ){
@@ -653,9 +665,9 @@ class images{
                     $ip = isset($_SERVER['X_FORWARDED_FOR']) ? $_SERVER['X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
                     $ip = mysql_real_escape_string($ip);
                     $sql = "INSERT INTO images (name, user_id, type, width, height, ";
-                    $sql .="uploaded, filesize, ip, checked, gallery_id) ";
+                    $sql .="uploaded, filesize, ip, checked, gallery_id, thumb_type) ";
                     $sql .="VALUES ('$name', {$this->user->user_id},'{$image->type}', ";
-                    $sql .="$newwidth, $newheight, now(),0, '$ip', {$image->checked},0) ";
+                    $sql .="$newwidth, $newheight, now(),0, '$ip', {$image->checked},0, '{$thumb_type}') ";
                     $res = $this->ace->query($sql, 'Add Image');
 
                     $id = mysql_insert_id();

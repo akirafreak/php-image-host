@@ -1462,12 +1462,19 @@ $dbschema = array (
                 'default' => 'AIRSTREA.TTF',
                 'extra' => ''
          ),
+         'thumb_format' => array(
+            'field' => 'thumb_format',
+            'type' => "enum('jpeg','original','auto')",
+            'null' => false,
+            'default' => 'jpeg',
+            'extra' => ''
+         ),
       'dbversion' =>
         array(
           'field' => 'dbversion',
             'type' => 'varchar(20)',
             'null' => false,
-            'default' => '1.4.0.12',
+            'default' => '1.4.0.13',
             'extra' => '',
         ),
     ),
