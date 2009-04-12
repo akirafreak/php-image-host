@@ -39,7 +39,14 @@ class myimagesAction extends action
 		$user = $this->app->userSession->user;
 		$config = $this->app->config;
 		$message = '';
-
+        $view_options = array('links' => 'Link Codes', 'sthumbs' => 'Thumbnails');
+        if( 1 ) {   // if( $user->captions ) {
+            $view_options['captions'] = 'Captions';
+        }
+        $view = $this->app->getParamStr('v', 'sthumbs');
+        if( !isset($view_options[$view]) ) {
+            $view = 'sthumbs';
+        }
 		if( isset($_REQUEST['setpublic']) ){
 			$pub = $this->app->getParamInt('setpublic');
 			$i = $this->app->getParamInt('i');
@@ -61,7 +68,7 @@ class myimagesAction extends action
 		$orderby = $this->app->getParamStr('o', 'date');
 		$orderdir = $this->app->getParamStr('od','desc');
 
-		if( !in_array($orderby, array('name', 'uploaded') ) ) $orderby = 'uploaded';
+		if( !in_array($orderby, array('name', 'uploaded', 'views', 'rating', 'bandwidth', 'filesize') ) ) $orderby = 'uploaded';
 		if( !in_array($orderdir, array('asc', 'desc') ) ) $orderdir = 'desc';
 
 		$ids = array();
@@ -170,7 +177,8 @@ class myimagesAction extends action
 		foreach( array(
 				'purl', 'imgs', 'last', 'first', 'page', 'totalpages', 
 				'perpage', 'gallery', 'message', 'orderby', 'orderdir',
-				'images', 'user', 'config','ids','g','emails','msg'
+				'images', 'user', 'config','ids','g','emails','msg','view',
+                'view_options'
 						)
 					as $var_name ) {
 			$this->theme->assign($var_name, $$var_name);
