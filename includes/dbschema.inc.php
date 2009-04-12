@@ -538,6 +538,15 @@ $dbschema = array (
                 'default' => 0,
                 'extra' => ''
        ),
+       'thumb_type' =>
+      array (
+        'field' => 'thumb_type',
+        'type' => 'varchar(5)',
+        'null' => false,
+        'default' => 'jpg',
+        'extra' => '',
+      ),
+
     ),
     'pk' => 'image_id',
     'keys' =>
@@ -1458,7 +1467,7 @@ $dbschema = array (
           'field' => 'dbversion',
             'type' => 'varchar(20)',
             'null' => false,
-            'default' => '1.4.0.10',
+            'default' => '1.4.0.12',
             'extra' => '',
         ),
     ),
