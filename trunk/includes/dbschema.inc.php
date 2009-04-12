@@ -546,7 +546,20 @@ $dbschema = array (
         'default' => 'jpg',
         'extra' => '',
       ),
-
+      'caption' => array(
+        'field' => 'caption',
+        'type' => 'varchar(60)',
+        'null' => false,
+        'default' => '',
+        'extra' => ''
+      ),
+      'description' => array(
+        'field' => 'description',
+        'type' => 'varchar(255)',
+        'null' => false,
+        'default' => '',
+        'extra' => ''
+      ),
     ),
     'pk' => 'image_id',
     'keys' =>

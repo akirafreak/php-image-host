@@ -41,6 +41,7 @@ class database
         'password' => '',
         'user' => ''
     );
+    public $queries = array();
 
 	function __construct($settings)
 	{
@@ -84,6 +85,7 @@ class database
         $this->connect();
         $sql = str_replace($this->tablePrefixPlaceholder, $this->tablePrefix, $sql);
 		$result = @mysql_query($sql, $this->connection);
+        $this->queries[] = $sql;
 		if( !$result && $die_on_error){
 			die('Database Error: '.$what.'<br />'.mysql_error().'<br /><br />'.nl2br($sql));
 		}

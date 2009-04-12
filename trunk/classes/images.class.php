@@ -33,7 +33,7 @@ class images{
 
 	var $errors = array();
 	var $orderbys = array('name'=>'Name', 'uploaded'=>'Uploaded', 'size'=>'File Size', 'format'=>'Format', 'bandwidth'=>'Bandwidth',
-                            'views' => 'Views', 'rating' => 'Rating', 'votes' => 'Votes');
+                            'views' => 'Views', 'rating' => 'Rating', 'votes' => 'Votes', 'filesize' => 'Filesize');
 	var $imagetypes = array(IMAGETYPE_JPEG=>'jpg', IMAGETYPE_PNG=>'png', IMAGETYPE_GIF=>'gif');
 	var $user = 0;
     var $app = null;
@@ -178,7 +178,7 @@ class images{
 				case 'name': $ob = 'i.name'; break;
 				case 'uploaded': $ob = 'i.uploaded'; break;
 				case 'format': $ob = 'i.type'; break;
-				case 'size': $ob = 'i.filesize'; break;
+				case 'size': case 'filesize': $ob = 'i.filesize'; break;
 				case 'username': $ob = 'u.username'; break;
 				case 'random': $ob = 'RAND() '; $orderdir = ''; break;
                 case 'rating': $ob = 'i.rating'; break;
