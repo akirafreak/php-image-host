@@ -1116,6 +1116,53 @@ class images{
         chmod($fname, 0777);
     }
 
+    function updateCaptions($img_ids, $captions, $descriptions = null)
+    {
+        if( !$this->user ) {
+            return 0;
+        }
+        // check the image ids belong to this user
+        $ids = array();
+        foreach( $img_ids as $id ) {
+            settype($id, 'integer');
+            $ids[] = $id;
+        }
+        $updated = 0;
+        if( count($ids) ) {
+            $ids = join(',',$ids);
+            $sql = "
+                SELECT image_id, caption, description
+                FROM images
+                WHERE user_id = {$this->user->user_id}
+                AND image_id IN ({$ids})
+            ";
+            $imgs = $this->app->db->fetchObjects($sql);
+            foreach( $imgs as $img ) {
+                $ups = array();
+                if( isset($captions[$img->image_id]) ) {
+                    $caption = substr(trim($captions[$img->image_id]), 0, 60);
+                    if( $caption != $img->caption ) {
+                        $ups[] = "caption = '".$this->app->db->escape($caption)."' ";
+                    }
+                }
+                if( isset($descriptions[$img->image_id]) ) {
+                    $description = substr(trim($descriptions[$img->image_id]), 0, 255);
+                    if( $description != $img->description ) {
+                        $ups[] = "description = '".$this->app->db->escape($description)."' ";
+                    }
+                }
+                if( count($ups) ) {
+                    $sql = "UPDATE images SET ".join(",",$ups)." WHERE image_id = {$img->image_id} ";
+                    $this->app->db->query($sql);
+                    $updated++;
+                }
+                if( $updated % 10 == 0 ) {
+                    usleep(100000);
+                }
+            }
+        }
+        return $updated;
+    }
 }
 
 ?>

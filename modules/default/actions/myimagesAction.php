@@ -40,7 +40,23 @@ class myimagesAction extends action
 		$config = $this->app->config;
 		$message = '';
         $view_options = array('links' => 'Link Codes', 'sthumbs' => 'Thumbnails');
-        if( 1 ) {   // if( $user->captions ) {
+        $publicprivate = $this->app->getParamInt('pubpri', -1);
+
+        // sort out the options for images per page
+        $perpage = $this->app->getParamInt('pp', $user->images_per_page);
+        $ppoptions = array(
+            5, 10, 20, 30, 50, 100
+        );
+        $perpage_options = array();
+        foreach( $ppoptions as $pp ) {
+            if( $pp <= $user->images_per_page ) {
+                $perpage_options[] = $pp;
+            }
+        }
+        if( $perpage > $user->images_per_page ) {
+            $perpage = $perpage_options[count($perpage_options)-1];
+        }
+        if( $user->captions != 'none' ) {
             $view_options['captions'] = 'Captions';
         }
         $view = $this->app->getParamStr('v', 'sthumbs');
@@ -77,8 +93,15 @@ class myimagesAction extends action
 		for( $i = 0; $i < $user->email_friends; $i++) $emails[$i] = '';
 
 		$modified = false;
-
-		if( $this->app->getParamStr('delete') != '' ){
+        if( isset($_POST['updatecaptions']) 
+            && $user->captions != 'none'
+            && isset($_POST['caption']) ) {
+            $uids = array_keys($_POST['caption']);
+            $captions = $_POST['caption'];
+            $descriptions = (isset($_POST['description']) && $user->captions == 'descriptions') ? $_POST['description'] : null;
+            $message = $images->updateCaptions($uids, $captions, $descriptions) . $this->app->translate('images updated.');
+        }
+        elseif( isset($_POST['delete']) ){
 
 			// user wants to delete some of their images
 
@@ -165,7 +188,7 @@ class myimagesAction extends action
 		}
 		$page = $this->app->getParamInt('p', 1);
 		if( $page < 1 ) $page = 1;
-		$perpage = $user->images_per_page;
+//		$perpage = $user->images_per_page;
 		$totalpages = ceil($user->images / $perpage);
 		if( $page > $totalpages ) $page = $totalpages;
 		$first = ($page -1 ) * $perpage;
@@ -178,7 +201,7 @@ class myimagesAction extends action
 				'purl', 'imgs', 'last', 'first', 'page', 'totalpages', 
 				'perpage', 'gallery', 'message', 'orderby', 'orderdir',
 				'images', 'user', 'config','ids','g','emails','msg','view',
-                'view_options'
+                'view_options', 'perpage_options', 'perpage', 'publicprivate'
 						)
 					as $var_name ) {
 			$this->theme->assign($var_name, $$var_name);

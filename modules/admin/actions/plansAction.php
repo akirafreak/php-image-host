@@ -59,6 +59,15 @@ class plansAction extends Action
                 $plans['free']->$i = $this->app->getParamInt($n1);
                 $plans['paid']->$i = $this->app->getParamInt($n2);
             }
+            $plans['free']->captions = $this->app->getParamStr('captions1');
+            if( !in_array($plans['free']->captions, array('none', 'captions', 'descriptions') ) ) {
+                $plans['free']->captions = 'none';
+            }
+            $plans['paid']->captions = $this->app->getParamStr('captions2');
+            if( !in_array($plans['paid']->captions, array('none', 'captions', 'descriptions') ) ) {
+                $plans['paid']->captions = 'none';
+            }
+
             $plans['free']->type_name = $this->app->getParamStr('type_name1', 'Free');
             $plans['paid']->type_name = $this->app->getParamStr('type_name2', 'Paid');
             $plans['paid']->cost_1 = $this->app->getParamDouble('cost_1', 4.95);
@@ -68,7 +77,8 @@ class plansAction extends Action
             if( $plans['free']->type_name == '' || $plans['paid']->type_name == '' ){
                 $errors = '<div class="errors">You must enter a name for each plan.</div>';
             }else{
-                $sql = "UPDATE account_types SET type_name='".mysql_real_escape_string($plans['free']->type_name)."' ";
+                $sql = "UPDATE account_types SET type_name='".mysql_real_escape_string($plans['free']->type_name)."',
+                        captions='{$plans['free']->captions}' ";
                 foreach( $ints as $i ){
                     $sql .= ','.$i.'='.$plans['free']->$i.' ';
                 }
@@ -76,6 +86,7 @@ class plansAction extends Action
                 $res = $this->app->query($sql, 'Update Free Plan');
 
                 $sql = "UPDATE account_types SET type_name='".mysql_real_escape_string($plans['paid']->type_name)."', ";
+                $sql .="captions='{$plans['paid']->captions}', ";
                 $sql .="cost_1='".$plans['paid']->cost_1."', ";
                 $sql .="cost_3='".$plans['paid']->cost_3."', ";
                 $sql .="cost_6='".$plans['paid']->cost_6."', ";
