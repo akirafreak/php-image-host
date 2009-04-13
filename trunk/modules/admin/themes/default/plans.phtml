@@ -136,7 +136,23 @@ Your current php ini maximum file upload size settings are:
 	<td class="formfield"><input type="checkbox" name="add_branding1" value="1" <?php if( $plans['free']->add_branding ) echo ' CHECKED ';?> /></td>
 	<td class="formfield"><input type="checkbox" name="add_branding2" value="1" <?php if( $plans['paid']->add_branding ) echo ' CHECKED ';?> /></td>
 </tr>
-
+<tr>
+    <td class="formlabel">Captions &amp; Description:</td>
+    <td class="formfield">
+        <select name="captions1">
+            <option value="none">No</option>
+            <option value="captions"<?php if( $plans['free']->captions == 'captions' ) echo ' selected="selected" '?>>Captions</option>
+            <option value="descriptions"<?php if( $plans['free']->captions == 'descriptions' ) echo ' selected="selected" '?>>Captions &amp; Descriptions</option>
+        </select>
+    </td>
+    <td class="formfield">
+        <select name="captions2">
+            <option value="none">No</option>
+            <option value="captions"<?php if( $plans['paid']->captions == 'captions' ) echo ' selected="selected" '?>>Captions</option>
+            <option value="descriptions"<?php if( $plans['paid']->captions == 'descriptions' ) echo ' selected="selected" '?>>Captions &amp; Descriptions</option>
+        </select>
+    </td>
+</tr>
 <tr>
 	<td class="formlabel">Show plans info on:</td>
 	<td class="formfield">

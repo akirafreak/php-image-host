@@ -243,6 +243,14 @@ $dbschema = array (
                 'default' => 8,
                 'extra' => '',
             ),
+       'captions' =>
+            array(
+                'field' => 'captions',
+                'type' => "enum('none','captions','descriptions')",
+                'null' => false,
+                'default' => 'none',
+                'extra' => ''
+            ),
     ),
     'pk' => 'type_type',
     'keys' =>
@@ -1487,7 +1495,7 @@ $dbschema = array (
           'field' => 'dbversion',
             'type' => 'varchar(20)',
             'null' => false,
-            'default' => '1.4.0.13',
+            'default' => '1.4.0.14',
             'extra' => '',
         ),
     ),
