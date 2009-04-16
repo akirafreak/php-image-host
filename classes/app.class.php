@@ -157,13 +157,14 @@ class app
 
 		$plans = array();
 		while( $p = mysql_fetch_object($res) ) $plans[$p->type_type] = $p;
-
 		$this->config->price_1 = $plans['paid']->cost_1;
 		$this->config->price_3 = $plans['paid']->cost_3;
 		$this->config->price_6 = $plans['paid']->cost_6;
 		$this->config->price_12 = $plans['paid']->cost_12;
 
-		$vars = array();
+        $plans['anon'] = $plans['anonymous'];
+
+        $vars = array();
 		foreach( $this->config as $n=>$v ){
 			if( !is_array($v) ) $vars[$n] = $v;
 		}

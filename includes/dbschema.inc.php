@@ -72,7 +72,7 @@ $dbschema = array (
         'field' => 'max_upload_size',
         'type' => 'int(11)',
         'null' => false,
-        'default' => '100000',
+        'default' => '2048',
         'extra' => '',
       ),
       'max_image_width' =>
@@ -1490,12 +1490,19 @@ $dbschema = array (
             'default' => 'jpeg',
             'extra' => ''
          ),
+         'anonymous_uploads' => array(
+            'field' => 'anonymous_uploads',
+            'type' => 'tinyint',
+            'null' => false,
+            'default' => 0,
+            'extra' => ''
+         ),
       'dbversion' =>
         array(
           'field' => 'dbversion',
             'type' => 'varchar(20)',
             'null' => false,
-            'default' => '1.4.0.14',
+            'default' => '1.4.0.15',
             'extra' => '',
         ),
     ),

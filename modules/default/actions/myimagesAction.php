@@ -43,7 +43,7 @@ class myimagesAction extends action
         $publicprivate = $this->app->getParamInt('pubpri', -1);
 
         // sort out the options for images per page
-        $perpage = $this->app->getParamInt('pp', $user->images_per_page);
+        $perpage = $this->app->getParamInt('pp', 0);
         $ppoptions = array(
             5, 10, 20, 30, 50, 100
         );
@@ -55,6 +55,9 @@ class myimagesAction extends action
         }
         if( $perpage > $user->images_per_page ) {
             $perpage = $perpage_options[count($perpage_options)-1];
+        }
+        elseif( $perpage == 0 ) {
+            $perpage = $perpage_options[count($perpage_options)/2];
         }
         if( $user->captions != 'none' ) {
             $view_options['captions'] = 'Captions';
@@ -195,7 +198,7 @@ class myimagesAction extends action
 		$last = min($first+$perpage,$user->images);
 		$imgs = $images->getimages($criteria, $orderby, $orderdir, $first, $perpage);
 
-		$purl = $this->url('myimages', 'o='.$orderby.'&od='.$orderdir.'&p={page}&g='.$g);
+		$purl = $this->url('myimages', 'o='.$orderby.'&od='.$orderdir.'&p={page}&g='.$g.'&pp='.$perpage.'&v='.$view);
 
 		foreach( array(
 				'purl', 'imgs', 'last', 'first', 'page', 'totalpages', 

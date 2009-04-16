@@ -40,11 +40,22 @@ class plansAction extends Action
         $plans = array();
         while( $p = mysql_fetch_object($res) ) $plans[$p->type_type] = $p;
 
+        // create anonymous plan if not exists
+        // would be better to have this in upgrade script,
+        // but this is simpler for now
+        if( !isset($plans['anonymous']) ) {
+            $sql = "INSERT INTO account_types (type_type, max_images, max_upload_size) VALUES ('anonymous',0, 1024) ";
+            $this->app->db->query($sql, 'Create Anonymous Account');
+            header('Location:'.$this->app->url('plans'));
+            exit();
+        }
+
         if( $this->app->getParamStr('update') != '' ){
 
             $this->app->config->home_page_show_plans = $this->app->getParamInt('home_page_show_plans');
             $this->app->config->upgrade_show_plans = $this->app->getParamInt('upgrade_show_plans');
-            $this->app->savesettings(array('home_page_show_plans','upgrade_show_plans'));
+            $this->app->config->anonymous_uploads = $this->app->getParamInt('anonymous_uploads');
+            $this->app->savesettings(array('home_page_show_plans','upgrade_show_plans', 'anonymous_uploads'));
 
             $ints = array('max_images', 'max_upload_size', 'max_image_width',
                             'max_image_height','bandwidth', 'storage','email_friends',
@@ -56,8 +67,10 @@ class plansAction extends Action
             foreach( $ints as $i ){
                 $n1 = $i.'1';
                 $n2 = $i.'2';
+                $n3 = $i.'3';
                 $plans['free']->$i = $this->app->getParamInt($n1);
                 $plans['paid']->$i = $this->app->getParamInt($n2);
+                $plans['anonymous']->$i = $this->app->getParamInt($n3);
             }
             $plans['free']->captions = $this->app->getParamStr('captions1');
             if( !in_array($plans['free']->captions, array('none', 'captions', 'descriptions') ) ) {
@@ -84,6 +97,13 @@ class plansAction extends Action
                 }
                 $sql.= "WHERE type_type='free' ";
                 $res = $this->app->query($sql, 'Update Free Plan');
+
+                $sql = "UPDATE account_types SET cost_1 = '0'";
+                foreach( $ints as $i ){
+                    $sql .= ','.$i.'='.$plans['anonymous']->$i.' ';
+                }
+                $sql.= "WHERE type_type='anonymous' ";
+                $res = $this->app->query($sql, 'Update Anonymous Upload Settings');
 
                 $sql = "UPDATE account_types SET type_name='".mysql_real_escape_string($plans['paid']->type_name)."', ";
                 $sql .="captions='{$plans['paid']->captions}', ";
