@@ -298,6 +298,7 @@ $lang['Password:'] = 'Password:';
 /*********************
  * plans.phtml
  *********************/
+$lang['Non-members'] = 'Non-members';
 $lang['Features'] = 'Features';
 $lang['Supported image formats'] = 'Supported image formats';
 $lang['Browse your uploaded images'] = 'Browse your uploaded images';
