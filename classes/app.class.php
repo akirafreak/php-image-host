@@ -611,7 +611,7 @@ input{
 	function runAction()
 	{
 		if( $this->action ) {
-			if( isset($this->action->requireLogin) && !$this->userSession->loggedin ) {
+			if( $this->action->requireLogin && !$this->userSession->loggedin ) {
 				header("Location: ".$this->url('login'));
 				exit();
 			}

@@ -140,13 +140,21 @@ class images{
 		}else{
 			$ipath = mysql_real_escape_string($this->ace->config->image_url);
 			$tpath = mysql_real_escape_string($this->ace->config->thumb_url);
-			$sql = "SELECT i.*, u.username, u.email, g.gallery_name, ";
-			$sql .="CONCAT('$ipath',u.username,'/', i.name, '.', type) AS image_url,  ";
-			$sql .="CONCAT('$tpath',u.username,'/', i.name, '.', thumb_type) AS thumb_url ";
+            $uncategorized = $this->app->db->escape($this->app->translate('Uncategorized'));
+			$sql = "
+                SELECT i.*, u.username, u.email, g.gallery_name,
+                IF(i.category_id=0,'{$uncategorized}', c.category_name) AS category_name,
+                CONCAT('{$ipath}',u.username,'/', i.name, '.', type) AS image_url,
+                CONCAT('{$tpath}',u.username,'/', i.name, '.', thumb_type) AS thumb_url
+            ";
 		}
-		$sql .="FROM {pa_dbprefix}images i LEFT OUTER JOIN {pa_dbprefix}galleries g ON i.gallery_id=g.gallery_id, ";
-		$sql .="{pa_dbprefix}users u  ";
-		$wheres = array("i.user_id=u.user_id ");
+		$sql .="
+            FROM {pa_dbprefix}images i
+            LEFT OUTER JOIN {pa_dbprefix}galleries g ON i.gallery_id=g.gallery_id
+            LEFT OUTER JOIN {pa_dbprefix}categories c ON i.category_id=c.category_id
+            JOIN {pa_dbprefix}users u ON i.user_id=u.user_id
+        ";
+		$wheres = array();
 		foreach( $criteria as $c=>$v){
 			switch( $c ){
 				case 'ids': $ids = $this->ace->getids($v);$ids[] = 0; $wheres[] = " i.image_id IN (".join(",",$ids).") "; break;
@@ -168,6 +176,7 @@ class images{
 				case 'galleryname': $wheres[] = "g.gallery_name LIKE '".mysql_real_escape_string(str_replace('*', '%', $v))."' "; break;
 				case 'bandwidth': settype($v, 'integer'); $wheres[] = "i.bandwidth/(1024*1024)>=$v "; break;
 				case 'id': case 'image_id': $wheres[] = "i.image_id = ".(int)$v; break;
+                case 'category_id': $wheres[] = "i.category_id = ".(int)$v; break;
 			}
 		}
 		if( count($wheres) > 0 ) $sql .= "WHERE ".join(" AND ", $wheres)." ";

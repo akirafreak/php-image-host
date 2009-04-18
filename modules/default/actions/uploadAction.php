@@ -28,23 +28,35 @@ THE SOFTWARE.
 
 class uploadAction extends action
 {
-	var $requireLogin = true;
+	var $requireLogin = false;
 	
 	function run()
 	{
+        if( !$this->app->userSession->loggedin && !$this->app->config->anonymous_uploads ) {
+            header("Location: ".$this->url('login'));
+            exit();
+        }
 		$this->app->loadClass('images');
-		$this->app->images->setuser($this->app->userSession->user);
+        if( $this->app->userSession->loggedin ) {
+            $user = $this->app->userSession->user;
+        }
+        else {
+            $user = $this->app->userSession->getAnonymousUser();
+            if( !$user ) {
+                header('Location:'.$this->url('login'));
+            }
+        }
+		$this->app->images->setuser($user);
 
 		$errors = array();
 		$uploaded = array();
 		$ids = array();
 		$public = $this->app->config->upload_public_default;
-		$user = $this->app->userSession->user;
 		$gallery = $this->app->getParamInt('gallery_id');
 		$userid = $user->user_id;
 		if( $this->app->getParamStr('upload') != ''  && $this->app->config->allow_uploads){
 			$public = $this->app->getParamInt('public');
-			for( $i = 0; $i < $this->app->userSession->user->simultaneous_uploads; $i++){
+			for( $i = 0; $i < $user->simultaneous_uploads; $i++){
 				$id = 'images'.$i;
 				if( isset($_FILES[$id]['tmp_name']) && is_uploaded_file($_FILES[$id]['tmp_name']) ){
 					$fname = $_FILES[$id]['tmp_name'];

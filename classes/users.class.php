@@ -34,8 +34,17 @@ class users{
 												'status'=>'Account Status', 'type'=>'Account Type', 'bandwidth'=>'Bandwidth Used',
 												'storage'=>'Storage Used');
 
-	function users(&$ace){
-		$this->ace =& $ace;
+    var $app = null;
+
+    function __construct($app)
+    {
+        $this->app = $app;
+        $this->ace = $app;
+    }
+
+	function users($app)
+    {
+        $this->__construct($app);
 	}
 
 	function adduser($username, $password, $email, $name, $status = -1){
@@ -415,6 +424,26 @@ class users{
 		}
 	}
 
+    function createAnonymousAccount($username)
+    {
+        $name = $this->app->db->escape($username);
+        $pass = $this->app->db->escape(md5(mt_rand(10000,9999999).time()));
+        $email = '';
+        $sql = "
+            INSERT INTO users
+                    (username, pass, email, name, status, joined, account_type)
+            VALUES ('$name', '$pass', '$email', 'Anonymous', 1, now(), 'anonymous')
+        ";
+        $this->app->db->query($sql);
+        $userid = $this->app->db->lastInsertId();
+        if( $userid != 0 ){
+            mkdir($this->app->config->image_folder.$username);
+			chmod($this->app->config->image_folder.$username, 0777);
+			mkdir($this->app->config->thumb_folder.$username);
+			chmod($this->app->config->thumb_folder.$username, 0777);
+        }
+		return $userid;
+    }
 }
 
 ?>

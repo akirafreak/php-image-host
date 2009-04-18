@@ -47,7 +47,13 @@ class userSession
 	{
 		$this->__construct($app);
 	}
-	
+
+    function getAnonymousUser()
+    {
+        $user = $this->app->users->getuser(array('username'=>$this->app->config->anonymous_account));
+        return $user;
+    }
+
 	function init()
 	{
 		if( $this->app->config->ban_ips && $this->app->ipbanned() ){
