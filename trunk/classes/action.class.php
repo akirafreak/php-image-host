@@ -32,7 +32,7 @@ THE SOFTWARE.
 */
 class action
 {
-
+    var $requireLogin = false;
 	/**
 	  * The application object
 	  */

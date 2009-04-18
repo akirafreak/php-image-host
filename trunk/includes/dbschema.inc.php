@@ -568,6 +568,13 @@ $dbschema = array (
         'default' => '',
         'extra' => ''
       ),
+      'category_id' => array(
+            'field' => 'category_id',
+            'type' => 'int',
+            'null' => true,
+            'default' => '',
+            'extra'=>'',
+      ),
     ),
     'pk' => 'image_id',
     'keys' =>
@@ -599,6 +606,10 @@ $dbschema = array (
         0 => 'uploaded',
         1 => 'public',
       ),
+      'catindex' => array(
+         0 => 'category_id',
+         1 => 'uploaded'
+      )
     ),
   ),
   'page_content' =>
@@ -1497,12 +1508,19 @@ $dbschema = array (
             'default' => 0,
             'extra' => ''
          ),
+         'anonymous_account' => array(
+            'field' => 'anonymous_account',
+                'type' => 'varchar(30)',
+                'null' => false,
+                'default' => '',
+                'extra' => '',
+         ),
       'dbversion' =>
         array(
           'field' => 'dbversion',
             'type' => 'varchar(20)',
             'null' => false,
-            'default' => '1.4.0.15',
+            'default' => '1.4.0.18',
             'extra' => '',
         ),
     ),
@@ -1571,6 +1589,169 @@ $dbschema = array (
       )
     )
   ),
+
+  'categories' =>
+  array (
+    'fields' =>
+    array (
+      'category_id' =>
+      array (
+        'field' => 'category_id',
+        'type' => 'int(11)',
+        'null' => false,
+        'default' => NULL,
+        'extra' => 'auto_increment',
+      ),
+      'category_name' =>
+      array (
+        'field' => 'category_name',
+        'type' => 'varchar(40)',
+        'null' => false,
+        'default' => '',
+        'extra' => '',
+      ),
+      'category_intro' =>
+      array (
+        'field' => 'category_intro',
+        'type' => 'varchar(50)',
+        'null' => false,
+        'default' => '',
+        'extra' => '',
+      ),
+    ),
+    'pk' => 'category_id',
+    'keys' => array(
+      'PRIMARY' =>
+      array (
+        0 => 'category_id',
+      ),
+      'cindex' => array(
+         0 => 'category_name'
+      ),
+    )
+  ),
+
+  'tags' => array(
+    'fields' => array(
+         'tag_id' => array(
+                'field' => 'tag_id',
+                'type' => 'int',
+                'null' => false,
+                'default' => 0,
+                'extra' => 'auto_increment'
+         ),
+         'tag' => array(
+                'field' => 'tag',
+                'type' => 'varchar(30)',
+                'null' => false,
+                'default' => '',
+                'extra' => ''
+         )
+    ),
+    'pk' => 'tag_id',
+    'keys' => array(
+        'PRIMARY' => array(
+                0 => 'tag_id'
+        ),
+        'tindex' => array(
+                0 => 'tag'
+        )
+    ),
+  ),
+
+  'tags_images' => array(
+    'fields' => array(
+         'tag_id' => array(
+                'field' => 'tag_id',
+                'type' => 'int',
+                'null' => false,
+                'default' => 0,
+                'extra' => '',
+         ),
+         'image_id' => array(
+                'field' => 'image_id',
+                'type' => 'int',
+                'null' => false,
+                'default' => 0,
+                'extra' => ''
+         )
+    ),
+    'pk' => 'tag_id,image_id',
+    'keys' => array(
+        'PRIMARY' => array(
+                0 => 'tag_id',
+                1 => 'image_id'
+        ),
+        'itindex' => array(
+                0 => 'image_id'
+        )
+    ),
+  ),
+
+  'comments' => array(
+        'fields' => array(
+            'comment_id' => array(
+                'field' => 'comment_id',
+                'type' => 'int',
+                'null' => false,
+                'default' => 0,
+                'extra' => 'auto_increment'
+            ),
+            'author_id' => array(
+                'field' => 'author_id',
+                'type' => 'int',
+                'null' => false,
+                'default' => 0,
+                'extra' => ''
+            ),
+            'image_id' => array(
+                'field' => 'image_id',
+                'type' => 'int',
+                'null' => false,
+                'default' => 0,
+                'extra' => ''
+            ),
+            'comment' => array(
+                'field' => 'comment',
+                'type' => 'varchar(255)',
+                'null' => false,
+                'default' => '',
+                'extra' => ''
+            ),
+            'posted' => array(
+                'field' => 'posted',
+                'type' => 'datetime',
+                'null' => false,
+                'default' => '',
+                'extra' => '',
+            ),
+            'status' => array(
+                'field' => 'status',
+                'type' => "enum('unmoderated', 'ok', 'abusive', 'spam')",
+                'null' => false,
+                'default' => '',
+                'extra' => ''
+            ),
+
+        ),
+        'pk' => 'comment_id',
+        'keys' => array(
+            'PRIMARY' => array(
+                0 => 'comment_id'
+            ),
+            'aindex' => array(
+                0 => 'author_id'
+            ),
+            'iindex' => array(
+                0 => 'image_id',
+                1 => 'posted'
+            ),
+            'pindex' => array(
+                0 => 'posted'
+            )
+        )
+  ),
+
   'users' =>
   array (
     'fields' =>

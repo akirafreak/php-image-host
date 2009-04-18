@@ -239,7 +239,7 @@ class database
 
     function keyDefnToSQL($name, $def)
     {
-        $key = "$name(".join($def).")";
+        $key = "$name(".join(',',$def).")";
         return $key;
     }
 

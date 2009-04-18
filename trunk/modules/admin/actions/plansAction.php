@@ -34,7 +34,7 @@ class plansAction extends Action
         $res = $this->app->query($sql, 'Get Account Types');
 
         $errors = '';
-
+        $message = '';
         if( mysql_num_rows($res)<2 ) die("Error retrieving account details from database.");
 
         $plans = array();
@@ -55,7 +55,37 @@ class plansAction extends Action
             $this->app->config->home_page_show_plans = $this->app->getParamInt('home_page_show_plans');
             $this->app->config->upgrade_show_plans = $this->app->getParamInt('upgrade_show_plans');
             $this->app->config->anonymous_uploads = $this->app->getParamInt('anonymous_uploads');
-            $this->app->savesettings(array('home_page_show_plans','upgrade_show_plans', 'anonymous_uploads'));
+            // handle creating anonymous user account
+            $anonac = $this->app->getParamStr('anonymous_account');
+            if( $anonac != '' ) {
+                if( $anonac != $this->app->config->anonymous_account ) {
+                    // check if it exists
+                    $acc = $this->app->loadClass('users')->getUser(array('username'=>$anonac));
+                    if( $acc ) {
+                        if( $acc->type_type != 'anonymous' ) {
+                            $errors = 'The account name "'.$anonac.'" cannot be an anonymous uploads account as its type is "'.$acc->type_type.'"';
+                        }
+                        else {
+                            $this->app->config->anonymous_account = $anonac;
+                        }
+                    }
+                    else {
+                        // create it if not
+                        $acc = $this->app->loadClass('users')->createAnonymousAccount($anonac);
+                        if( $acc ) {
+                            $this->app->config->anonymous_account = $anonac;
+                        }
+                    }
+                }
+            }
+
+            if( $this->app->config->anonymous_uploads && !$this->app->config->anonymous_account && !$errors ) {
+                $this->app->config->anonymous_account = '';
+                $errors = 'You must specify an account name to use for anonymous uploads. This should either be
+                            a new (unused) account name, or the name of an account previously used for anonymous (not-logged-in) uploads.';
+            }
+
+            $this->app->savesettings(array('home_page_show_plans','upgrade_show_plans', 'anonymous_uploads', 'anonymous_account'));
 
             $ints = array('max_images', 'max_upload_size', 'max_image_width',
                             'max_image_height','bandwidth', 'storage','email_friends',
@@ -87,9 +117,10 @@ class plansAction extends Action
             $plans['paid']->cost_3 = $this->app->getParamDouble('cost_3', 4.95);
             $plans['paid']->cost_6 = $this->app->getParamDouble('cost_6', 4.95);
             $plans['paid']->cost_12 = $this->app->getParamDouble('cost_12', 4.95);
+
             if( $plans['free']->type_name == '' || $plans['paid']->type_name == '' ){
                 $errors = '<div class="errors">You must enter a name for each plan.</div>';
-            }else{
+            }elseif( !$errors ){
                 $sql = "UPDATE account_types SET type_name='".mysql_real_escape_string($plans['free']->type_name)."',
                         captions='{$plans['free']->captions}' ";
                 foreach( $ints as $i ){
@@ -116,7 +147,7 @@ class plansAction extends Action
                 }
                 $sql.= "WHERE type_type='paid' ";
                 $res = $this->app->query($sql, 'Update Paid Plan');
-                $errors =  '<div class="errors">Plan Specifications Updated</div>';
+                $message =  '<div class="errors">Plan Specifications Updated</div>';
 
                 if( !isset($users) ){
                     $users = $this->app->loadClass('users');
@@ -124,7 +155,7 @@ class plansAction extends Action
                 $users->canceluseroverbandwidth();
             }
         }
-        foreach( array('plans','errors') as $var ) {
+        foreach( array('plans','errors', 'message') as $var ) {
             $this->theme->assign($var, $$var);
         }
     }

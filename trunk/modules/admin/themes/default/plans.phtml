@@ -21,7 +21,8 @@ Your current php ini maximum file upload size settings are:
 </p>
 </div>
 <br /><br />
-<?php if( $errors ) echo $errors;?>
+<?php if( $errors ) echo '<div style="text-align: center;margin: 1em;"><h2>Please correct these errors:</h2>'.$errors.'<?div>';?>
+<?php if( $message ) echo $message;?>
 <form action="<?php echo $this->url('plans')?>" method="post">
 <table class="formtable" cellspacing="1" border="0" cellpadding="0" align="center">
 <tr>
@@ -42,7 +43,18 @@ Your current php ini maximum file upload size settings are:
 	<td class="formlabel" rowspan="4">Price:</td>
 	<td class="formfield" style="text-align: right;">1 Month:</td>
 	<td class="formfield"><input type="text" name="cost_1" value="<?php echo $plans['paid']->cost_1;?>" /></td>
-    <td rowspan="5">&nbsp;</td>
+    <td rowspan="5" class="formfield" style="vertical-align: top;">
+        <b>Anonymous Uploads Account Name:</b>
+        <br />
+        <input type="text" name="anonymous_account" value="<?php echo htmlspecialchars($this->app->config->anonymous_account)?>" />
+        <br />
+        To enable anonymous uploads you must specify <br />
+        the account name (username) of the account to <br />
+        use for anonymous uploads. If this account does <br />
+        not exist it will be created automatically.
+        <br />
+        You <i>cannot</i> specify the name of an <br />existing free or paid account.
+    </td>
 </tr>
 <tr>
 	<td class="formfield" style="text-align: right;">3 Months:</td>
